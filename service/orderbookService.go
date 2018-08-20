@@ -17,10 +17,10 @@ type orderBookUsecase struct {
 
 // NewOrderBookService ...
 func NewOrderBookService(obr repository.OrderBookRepository,
-	tickerRepo repository.TickerRepository,
+	tokenRepo repository.TokenRepository,
 	timeout time.Duration) OrderBookService {
 
-	tickers, err := tickerRepo.GetTickers(context.Background())
+	tokens, err := tokenRepo.GetTokens(context.Background())
 	if err != nil {
 		mlog.Errorw("NewOrderBookService", "err", err)
 		return nil
@@ -30,8 +30,8 @@ func NewOrderBookService(obr repository.OrderBookRepository,
 		ctxTimeout:    timeout,
 		symbolMap:     make(map[string]string),
 	}
-	for _, t := range tickers {
-		obu.symbolMap[t.TokenSymbol] = t.ContractAccount
+	for _, t := range tokens {
+		obu.symbolMap[t.Symbol] = t.ContractAccount
 	}
 	return obu
 }

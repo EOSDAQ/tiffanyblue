@@ -54,9 +54,9 @@ func InitHandler(tiffanyBlue conf.ViperConfig, e *echo.Echo, db *gorm.DB) (err e
 	orderBook := sys.Group("/orderbook")
 	ticker := sys.Group("/ticker")
 	orderBookRepo := _Repo.NewGormOrderBookRepository(db)
-	tickerRepo := _Repo.NewGormTickerRepository(db)
-	orderBookSvc := service.NewOrderBookService(orderBookRepo, tickerRepo, timeout)
-	tickerSvc := service.NewTickerService(tickerRepo, timeout)
+	tokenRepo := _Repo.NewGormTokenRepository(db)
+	orderBookSvc := service.NewOrderBookService(orderBookRepo, tokenRepo, timeout)
+	tickerSvc := service.NewTickerService(tokenRepo, timeout)
 
 	newOrderBookHTTPHandler(orderBook, orderBookSvc)
 	newTickerHTTPHandler(ticker, tickerSvc)

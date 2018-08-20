@@ -68,8 +68,8 @@ type OrderBookRepository interface {
 	GetOrderInfos(ctx context.Context, contract string) (obs []*models.OrderInfo, err error)
 }
 
-// TickerRepository ...
-type TickerRepository interface {
-	GetTickers(ctx context.Context) (ts []*models.Ticker, err error)
-	GetTicker(ctx context.Context, symbol string) (ticker *models.Ticker, err error)
+// TokenRepository ...
+type TokenRepository interface {
+	GetTokens(ctx context.Context) (ts []*models.Token, err error)
+	GetToken(ctx context.Context, symbol string) (token *models.Token, err error)
 }

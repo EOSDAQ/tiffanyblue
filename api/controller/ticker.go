@@ -10,7 +10,7 @@ import (
 
 // TickerResponse ...
 type TickerResponse struct {
-	Tickers []*models.Ticker
+	Tickers []*models.Token
 }
 
 // Ticker ...
@@ -66,6 +66,6 @@ func (h *HTTPTickerHandler) Ticker(c echo.Context) (err error) {
 		ResultCode: "0000",
 		ResultMsg:  "OK",
 		TRID:       trID,
-		ResultData: TickerResponse{[]*models.Ticker{ticker}},
+		ResultData: TickerResponse{[]*models.Token{ticker}},
 	})
 }

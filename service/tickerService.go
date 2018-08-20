@@ -10,25 +10,25 @@ import (
 )
 
 type tickerUsecase struct {
-	tickerRepo repository.TickerRepository
+	tokenRepo  repository.TokenRepository
 	ctxTimeout time.Duration
 }
 
 // NewTickerService ...
-func NewTickerService(tr repository.TickerRepository,
+func NewTickerService(tr repository.TokenRepository,
 	timeout time.Duration) TickerService {
 	return &tickerUsecase{
-		tickerRepo: tr,
+		tokenRepo:  tr,
 		ctxTimeout: timeout,
 	}
 }
 
 // GetTickers ...
-func (tu tickerUsecase) GetTickers(ctx context.Context) (ts []*models.Ticker, err error) {
+func (tu tickerUsecase) GetTickers(ctx context.Context) (ts []*models.Token, err error) {
 	innerCtx, cancel := context.WithTimeout(ctx, tu.ctxTimeout)
 	defer cancel()
 
-	ts, err = tu.tickerRepo.GetTickers(innerCtx)
+	ts, err = tu.tokenRepo.GetTokens(innerCtx)
 	if err != nil {
 		return nil, errors.Annotatef(err, "GetTickers")
 	}
@@ -36,11 +36,11 @@ func (tu tickerUsecase) GetTickers(ctx context.Context) (ts []*models.Ticker, er
 }
 
 // GetTicker ...
-func (tu tickerUsecase) GetTicker(ctx context.Context, symbol string) (ticker *models.Ticker, err error) {
+func (tu tickerUsecase) GetTicker(ctx context.Context, symbol string) (ticker *models.Token, err error) {
 	innerCtx, cancel := context.WithTimeout(ctx, tu.ctxTimeout)
 	defer cancel()
 
-	ticker, err = tu.tickerRepo.GetTicker(innerCtx, symbol)
+	ticker, err = tu.tokenRepo.GetToken(innerCtx, symbol)
 	if err != nil {
 		return nil, errors.Annotatef(err, "GetTicker symbol[%s]", symbol)
 	}

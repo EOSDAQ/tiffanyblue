@@ -14,8 +14,7 @@ RUN go get -u github.com/go-swagger/go-swagger/cmd/swagger
 
 ARG VERSION
 ARG BUILD_DATE
-ARG BUILD_PKG=`basename $(pwd)`
-RUN echo "pkg is " $BUILD_PKG
+ARG BUILD_PKG
 
 # Copy the code from the host and compile it
 WORKDIR $GOPATH/src/tiffanyBlue
@@ -26,7 +25,7 @@ RUN cd ./api && swagger generate spec -o /swagger.json
 RUN cp -fp conf/.env.json /.env.json
 
 FROM alpine
-ARG BUILD_PKG=`basename $(pwd)`
+ARG BUILD_PKG
 COPY --from=builder /$BUILD_PKG ./
 COPY --from=builder /swagger.json ./
 COPY --from=builder /.env.json ./

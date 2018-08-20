@@ -38,6 +38,6 @@ type OrderBookService interface {
 
 // TickerService ...
 type TickerService interface {
-	GetTickers(ctx context.Context) (ts []*models.Ticker, err error)
-	GetTicker(ctx context.Context, symbol string) (ticker *models.Ticker, err error)
+	GetTickers(ctx context.Context) (ts []*models.Token, err error)
+	GetTicker(ctx context.Context, symbol string) (ticker *models.Token, err error)
 }
