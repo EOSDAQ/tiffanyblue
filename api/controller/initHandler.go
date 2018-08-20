@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"net/http"
 	"time"
 
 	mw "tiffanyBlue/api/middleware"
@@ -17,10 +18,10 @@ import (
 type (
 	// TiffanyBlueStatus for common response status
 	TiffanyBlueStatus struct {
-		TRID       string `json:"trID"`
-		ResultCode string `json:"resultCode"`
-		ResultMsg  string `json:"resultMsg"`
-		ResultData string `json:"resultData"`
+		TRID       string      `json:"trID"`
+		ResultCode string      `json:"resultCode"`
+		ResultMsg  string      `json:"resultMsg"`
+		ResultData interface{} `json:"resultData"`
 	}
 )
 
@@ -45,6 +46,21 @@ func InitHandler(tiffanyBlue conf.ViperConfig, e *echo.Echo, db *gorm.DB) (err e
 	chartSvc := service.NewChartService(chartRepo, timeout)
 	newChartHTTPHandler(chart, chartSvc)
 
+	api := e.Group("/api")
+	ver := api.Group("/v1")
+	sys := ver.Group("/eosdaq")
+	sys.Use(mw.TransID())
+
+	orderBook := sys.Group("/orderbook")
+	ticker := sys.Group("/ticker")
+	orderBookRepo := _Repo.NewGormOrderBookRepository(db)
+	tickerRepo := _Repo.NewGormTickerRepository(db)
+	orderBookSvc := service.NewOrderBookService(orderBookRepo, tickerRepo, timeout)
+	tickerSvc := service.NewTickerService(tickerRepo, timeout)
+
+	newOrderBookHTTPHandler(orderBook, orderBookSvc)
+	newTickerHTTPHandler(ticker, tickerSvc)
+
 	return nil
 }
 
@@ -58,6 +74,9 @@ func newChartHTTPHandler(eg *echo.Group, cs service.ChartService) {
 		ChartService: cs,
 	}
 
+	eg.GET("", func(c echo.Context) error { return c.String(http.StatusOK, "tiffanyBlue API Alive!\n") })
+	eg.POST("", func(c echo.Context) error { return c.String(http.StatusOK, "tiffanyBlue API Alive!\n") })
+
 	eg.GET("config", handler.Config)
 	eg.GET("symbol_info", handler.SymbolInfo)
 	eg.GET("symbols", handler.Symbols)
@@ -67,4 +86,31 @@ func newChartHTTPHandler(eg *echo.Group, cs service.ChartService) {
 	eg.GET("timescale_marks", handler.TimeScale)
 	eg.GET("time", handler.Time)
 	eg.GET("quotes", handler.Quotes)
+}
+
+// HTTPOrderBookHandler ...
+type HTTPOrderBookHandler struct {
+	OrderBookService service.OrderBookService
+}
+
+func newOrderBookHTTPHandler(eg *echo.Group, obs service.OrderBookService) {
+	handler := &HTTPOrderBookHandler{
+		OrderBookService: obs,
+	}
+
+	eg.GET("/:symbol", handler.OrderBook)
+}
+
+// HTTPTickerHandler ...
+type HTTPTickerHandler struct {
+	TickerService service.TickerService
+}
+
+func newTickerHTTPHandler(eg *echo.Group, ts service.TickerService) {
+	handler := &HTTPTickerHandler{
+		TickerService: ts,
+	}
+
+	eg.GET("", handler.TickerList)
+	eg.GET("/:symbol", handler.Ticker)
 }
