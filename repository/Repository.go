@@ -62,3 +62,14 @@ func InitDB(tiffanyBlue conf.ViperConfig) *gorm.DB {
 type ChartRepository interface {
 	GetByID(ctx context.Context, id string) (*models.Chart, error)
 }
+
+// OrderBookRepository ...
+type OrderBookRepository interface {
+	GetOrderInfos(ctx context.Context, contract string) (obs []*models.OrderInfo, err error)
+}
+
+// TickerRepository ...
+type TickerRepository interface {
+	GetTickers(ctx context.Context) (ts []*models.Ticker, err error)
+	GetTicker(ctx context.Context, symbol string) (ticker *models.Ticker, err error)
+}

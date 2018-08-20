@@ -7,11 +7,6 @@ import (
 	"time"
 )
 
-// ChartService ...
-type ChartService interface {
-	GetByID(ctx context.Context, id string) (*models.Chart, error)
-}
-
 type chartUsecase struct {
 	chartRepo  repository.ChartRepository
 	ctxTimeout time.Duration

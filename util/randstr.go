@@ -48,8 +48,18 @@ func RandNum(max int) int {
 	return rand.New(src).Intn(max)
 }
 
+// RandRate ...
+func RandRate(max int) float64 {
+	return float64(RandNum(100+max)+90) / float64(100)
+}
+
 // IntRayleighCDF ...
 func IntRayleighCDF() int {
 	rnum := rand.New(src).Float64()
 	return int(math.Sqrt(-2 * math.Log(float64(1)-rnum)))
+}
+
+// ArrayToString ...
+func ArrayToString(a []uint, delim string) string {
+	return strings.Trim(strings.Replace(fmt.Sprint(a), " ", delim, -1), "[]")
 }
