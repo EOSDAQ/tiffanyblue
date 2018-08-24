@@ -31,4 +31,4 @@ COPY --from=builder /swagger.json ./
 COPY --from=builder /.env.json ./
 ENV PORT 18890
 EXPOSE 18890
-ENTRYPOINT ["/"$BUILD_PKG]
+ENTRYPOINT ["/tiffanyblue"]
