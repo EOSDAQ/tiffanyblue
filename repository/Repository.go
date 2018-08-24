@@ -41,6 +41,15 @@ func InitDB(tiffanyBlue conf.ViperConfig) *gorm.DB {
 
 	mlog, _ = util.InitLog("repository", tiffanyBlue.GetString("logmode"))
 
+	mlog.Infow("InitDB ",
+		"host",
+		tiffanyBlue.GetString("db_host"),
+		"user",
+		tiffanyBlue.GetString("db_user"),
+		"name",
+		tiffanyBlue.GetString("db_name"),
+	)
+
 	dbURI := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
 		tiffanyBlue.GetString("db_user"),
 		tiffanyBlue.GetString("db_pass"),
