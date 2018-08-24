@@ -15,6 +15,7 @@ RUN go get -u github.com/go-swagger/go-swagger/cmd/swagger
 ARG VERSION
 ARG BUILD_DATE
 ARG BUILD_PKG
+ARG BUILD_PORT
 
 # Copy the code from the host and compile it
 WORKDIR $GOPATH/src/tiffanyBlue
@@ -26,9 +27,10 @@ RUN cp -fp conf/.env.json /.env.json
 
 FROM alpine
 ARG BUILD_PKG
+ARG BUILD_PORT
 COPY --from=builder /$BUILD_PKG ./
 COPY --from=builder /swagger.json ./
 COPY --from=builder /.env.json ./
-ENV PORT 18890
-EXPOSE 18890
+ENV PORT $BUILD_PORT
+EXPOSE $BUILD_PORT
 ENTRYPOINT ["/tiffanyblue"]
