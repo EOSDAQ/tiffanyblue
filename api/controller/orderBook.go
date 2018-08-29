@@ -12,7 +12,7 @@ func (h *HTTPOrderBookHandler) OrderBook(c echo.Context) (err error) {
 
 	trID := c.Response().Header().Get(echo.HeaderXRequestID)
 	symbol := c.Param("symbol")
-	mlog.Infow("orderbook", "tr", trID, "symbol", symbol)
+	mlog.Debugw("orderbook", "tr", trID, "symbol", symbol)
 
 	ctx := c.Request().Context()
 	if ctx == nil {

@@ -37,11 +37,11 @@ func init() {
 }
 
 // InitDB ...
-func InitDB(tiffanyBlue conf.ViperConfig) *gorm.DB {
+func InitDB(tiffanyBlue *conf.ViperConfig) *gorm.DB {
 
-	mlog, _ = util.InitLog("repository", tiffanyBlue.GetString("logmode"))
+	mlog, _ = util.InitLog("repository", tiffanyBlue.GetString("env"))
 
-	mlog.Infow("InitDB ",
+	mlog.Debugw("InitDB ",
 		"host",
 		tiffanyBlue.GetString("db_host"),
 		"user",

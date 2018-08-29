@@ -17,7 +17,7 @@ type TickerResponse struct {
 func (h *HTTPTickerHandler) TickerList(c echo.Context) (err error) {
 
 	trID := c.Response().Header().Get(echo.HeaderXRequestID)
-	mlog.Infow("TickerList", "tr", trID)
+	mlog.Debugw("TickerList", "tr", trID)
 
 	ctx := c.Request().Context()
 	if ctx == nil {
@@ -46,7 +46,7 @@ func (h *HTTPTickerHandler) Ticker(c echo.Context) (err error) {
 
 	trID := c.Response().Header().Get(echo.HeaderXRequestID)
 	symbol := c.Param("symbol")
-	mlog.Infow("ticker", "tr", trID, "symbol", symbol)
+	mlog.Debugw("ticker", "tr", trID, "symbol", symbol)
 
 	ctx := c.Request().Context()
 	if ctx == nil {
