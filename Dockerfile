@@ -11,7 +11,7 @@ ARG BUILD_PKG
 ARG BUILD_PORT
 
 # Copy the code from the host and compile it
-WORKDIR $GOPATH/src/$BUILD_PKG
+WORKDIR $GOPATH/src/tiffanyBlue
 COPY . ./
 RUN make vendor
 RUN cd ./api && CGO_ENABLED=0 GOOS=linux go build -i -tags 'release' -a -installsuffix nocgo -ldflags "-X main.Version="$VERSION" -X main.BuildDate="$BUILD_DATE -o /$BUILD_PKG .

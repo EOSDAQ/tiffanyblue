@@ -21,7 +21,7 @@ M = $(shell printf "\033[34;1m▶\033[0m")
 GOV = $(shell $(GO) version)
 SUDO = ""
 ifneq ($(shell id -u -r),0)
-SUDO = sudo
+SUDO = sudo -E
 endif
 
 BUILDTAG=-tags 'release'
