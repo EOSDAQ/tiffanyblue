@@ -11,7 +11,7 @@ import (
 func (h *HTTPChartHandler) Config(c echo.Context) (err error) {
 
 	trID := c.Response().Header().Get(echo.HeaderXRequestID)
-	mlog.Infow("config", "tr", trID)
+	mlog.Debugw("config", "tr", trID)
 
 	configResponse := struct {
 		SupportedResolution    []string `json:"supported_resolutions"`
@@ -34,7 +34,7 @@ func (h *HTTPChartHandler) SymbolInfo(c echo.Context) (err error) {
 
 	trID := c.Response().Header().Get(echo.HeaderXRequestID)
 	group := c.QueryParam("group")
-	mlog.Infow("symbol_info", "tr", trID, "group", group)
+	mlog.Debugw("symbol_info", "tr", trID, "group", group)
 
 	symbolInfoResponse := struct {
 		Symbol         []string `json:"symbol"`
@@ -75,7 +75,7 @@ func (h *HTTPChartHandler) Symbols(c echo.Context) (err error) {
 
 	trID := c.Response().Header().Get(echo.HeaderXRequestID)
 	symbol := c.QueryParam("symbol")
-	mlog.Infow("symbols", "tr", trID, "symbol", symbol)
+	mlog.Debugw("symbols", "tr", trID, "symbol", symbol)
 
 	symbolResponse := struct {
 		Name                 string   `json:"name"`
@@ -131,7 +131,7 @@ func (h *HTTPChartHandler) Search(c echo.Context) (err error) {
 			TRID:       trID,
 		})
 	}
-	mlog.Infow("search", "tr", trID, "query", option.Query, "type", option.TypeParam, "exchange", option.Exchange, "limit", option.Limit)
+	mlog.Debugw("search", "tr", trID, "query", option.Query, "type", option.TypeParam, "exchange", option.Exchange, "limit", option.Limit)
 
 	searchResponse := []struct {
 		Symbol      string `json:"symbol"`
@@ -169,7 +169,7 @@ func (h *HTTPChartHandler) History(c echo.Context) (err error) {
 			TRID:       trID,
 		})
 	}
-	mlog.Infow("history", "tr", trID, "symbol", option.Symbol, "from", option.From, "to", option.To, "resolution", option.Resolution)
+	mlog.Debugw("history", "tr", trID, "symbol", option.Symbol, "from", option.From, "to", option.To, "resolution", option.Resolution)
 
 	historyResponse := struct {
 		T []int     `json:"t"`
@@ -209,7 +209,7 @@ func (h *HTTPChartHandler) Marks(c echo.Context) (err error) {
 			TRID:       trID,
 		})
 	}
-	mlog.Infow("marks", "tr", trID, "symbol", option.Symbol, "from", option.From, "to", option.To, "resolution", option.Resolution)
+	mlog.Debugw("marks", "tr", trID, "symbol", option.Symbol, "from", option.From, "to", option.To, "resolution", option.Resolution)
 
 	marksResponse := struct {
 		ID             []int    `json:"id"`
@@ -256,7 +256,7 @@ func (h *HTTPChartHandler) TimeScale(c echo.Context) (err error) {
 			TRID:       trID,
 		})
 	}
-	mlog.Infow("timescale_marks", "tr", trID, "symbol", option.Symbol, "from", option.From, "to", option.To, "resolution", option.Resolution)
+	mlog.Debugw("timescale_marks", "tr", trID, "symbol", option.Symbol, "from", option.From, "to", option.To, "resolution", option.Resolution)
 
 	timescaleResponse := []struct {
 		ID      string   `json:"id"`
@@ -280,7 +280,7 @@ func (h *HTTPChartHandler) Time(c echo.Context) (err error) {
 
 	trID := c.Response().Header().Get(echo.HeaderXRequestID)
 
-	mlog.Infow("time", "tr", trID)
+	mlog.Debugw("time", "tr", trID)
 
 	return c.JSON(http.StatusOK, int32(time.Now().Unix()))
 }
@@ -300,7 +300,7 @@ func (h *HTTPChartHandler) Quotes(c echo.Context) (err error) {
 			TRID:       trID,
 		})
 	}
-	mlog.Infow("quotes", "tr", trID, "symbols", option.Symbols)
+	mlog.Debugw("quotes", "tr", trID, "symbols", option.Symbols)
 
 	/*
 		quotesResponse := struct {

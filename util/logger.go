@@ -20,9 +20,9 @@ func InitLog(name string, logMode string) (log *zap.SugaredLogger, err error) {
 
 	var cfg zap.Config
 	var enccfg zapcore.EncoderConfig
-	if logMode == "json" {
+	if logMode == "prod" {
 		cfg = zap.NewProductionConfig()
-		cfg.Encoding = "json"
+		cfg.Encoding = "console"
 		enccfg = zap.NewProductionEncoderConfig()
 	} else {
 		cfg = zap.NewDevelopmentConfig()
@@ -31,7 +31,7 @@ func InitLog(name string, logMode string) (log *zap.SugaredLogger, err error) {
 	}
 	enccfg.EncodeTime = TimeEncoder
 	enccfg.CallerKey = ""
-	enccfg.LevelKey = ""
+	//enccfg.LevelKey = ""
 	cfg.EncoderConfig = enccfg
 
 	logger, err := cfg.Build()

@@ -32,9 +32,9 @@ func init() {
 }
 
 // InitHandler ...
-func InitHandler(tiffanyBlue conf.ViperConfig, e *echo.Echo, db *gorm.DB) (err error) {
+func InitHandler(tiffanyBlue *conf.ViperConfig, e *echo.Echo, db *gorm.DB) (err error) {
 
-	mlog, _ = util.InitLog("controller", tiffanyBlue.GetString("logmode"))
+	mlog, _ = util.InitLog("controller", tiffanyBlue.GetString("env"))
 	timeout := time.Duration(tiffanyBlue.GetInt("timeout")) * time.Second
 
 	// Default Group
