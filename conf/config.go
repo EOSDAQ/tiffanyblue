@@ -44,18 +44,13 @@ var defaultConf = DefaultConf{
 	ConfServerLOGMODE: "console",
 	ConfServerTIMEOUT: 30,
 	ConfAPILOGLEVEL:   "debug",
-	ConfDBHOST:        "www.db4free.net",
-	ConfDBPORT:        3306,
-	ConfDBUSER:        "eosdaquser",
-	ConfDBPASS:        "eosdaqvotmdnjem",
-	ConfDBNAME:        "eosdaq",
 	ConfAWSRegion:     "ap-northeast-2",
 }
 
 // ViperConfig ...
 type ViperConfig struct {
 	*viper.Viper
-	ssmsvc       *ssm.SSM
+	ssmsvc      *ssm.SSM
 	cacheString map[string]string
 	cacheInt    map[string]int
 }
@@ -84,11 +79,6 @@ func init() {
 		"loglevel":    defaultConf.ConfAPILOGLEVEL,
 		"profile":     false,
 		"profilePort": 6060,
-		"db_host":     defaultConf.ConfDBHOST,
-		"db_port":     defaultConf.ConfDBPORT,
-		"db_user":     defaultConf.ConfDBUSER,
-		"db_pass":     defaultConf.ConfDBPASS,
-		"db_name":     defaultConf.ConfDBNAME,
 		"aws_region":  defaultConf.ConfAWSRegion,
 		"env":         "production",
 	})
