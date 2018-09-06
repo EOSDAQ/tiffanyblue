@@ -25,7 +25,8 @@ func (g *gormEosdaqTxRepository) GetTickers(ctx context.Context) (ts []*models.T
 }
 
 func (g *gormEosdaqTxRepository) GetTicker(ctx context.Context, symbol string) (token *models.Token, err error) {
-	scope := g.Conn.Where(models.Token{Symbol: symbol}).First(&token)
+	token = &models.Token{}
+	scope := g.Conn.Where("symbol = ?", symbol).First(&token)
 	if scope.RowsAffected == 0 {
 		return nil, nil
 	}

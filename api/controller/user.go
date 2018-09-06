@@ -3,7 +3,7 @@ package controller
 import "github.com/labstack/echo"
 
 func (h *HTTPUserHandler) UserTxList(c echo.Context) (err error) {
-	return nll
+	return nil
 }
 
 func (h *HTTPUserHandler) UserSymbolTxList(c echo.Context) (err error) {

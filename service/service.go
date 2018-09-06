@@ -31,22 +31,32 @@ type ChartService interface {
 	GetByID(ctx context.Context, id string) (*models.Chart, error)
 }
 
-// OrderBookService ...
-type OrderBookService interface {
-	GetOrderBooks(ctx context.Context, symbol string) (obs *models.OrderBook, err error)
-}
-
-// EosdaqTxService ...
-type EosdaqTxService interface {
+// SymbolService ...
+type SymbolService interface {
 	GetTickers(ctx context.Context) (ts []*models.Token, err error)
 	GetTicker(ctx context.Context, symbol string) (ticker *models.Token, err error)
+
 	GetSymbolTxList(ctx context.Context, symbol string) (txs []*models.EosdaqTx, err error)
+	GetSymbolOrderBook(ctx context.Context, symbol string) (ob *models.OrderBook, err error)
 }
 
 // UserService ...
 type UserService interface {
-	GetUserTxList(ctx context.Context, accountName string, offset int64) (txs []*models.EosdaqTx, err error)
 	GetUserSymbolTxList(ctx context.Context, accountName, symbol string) (txs []*models.EosdaqTx, err error)
-	GetUserOrderBook(ctx context.Context, accountName string) (obs *models.OrderBook, err error)
-	GetUserSymbolOrderBook(ctx context.Context, accountName, symbol string) (obs *models.OrderBook, err error)
+	GetUserSymbolOrderBook(ctx context.Context, accountName, symbol string) (ob *models.OrderBook, err error)
+
+	GetUserTxList(ctx context.Context, accountName string, offset int64) (txs []*models.EosdaqTx, err error)
+	GetUserOrderBook(ctx context.Context, accountName string) (ob *models.OrderBook, err error)
+}
+
+func ConvertOrderBook(obinfos []*models.OrderInfo) (ob *models.OrderBook) {
+	ob = &models.OrderBook{}
+	for _, info := range obinfos {
+		if info.Type == models.ASK {
+			ob.AskRow = append(ob.AskRow, info)
+		} else if info.Type == models.BID {
+			ob.BidRow = append(ob.BidRow, info)
+		}
+	}
+	return ob
 }

@@ -52,21 +52,15 @@ func InitHandler(tiffanyBlue *conf.ViperConfig, e *echo.Echo, db *gorm.DB) (err 
 	sys := ver.Group("/eosdaq")
 	sys.Use(mw.TransID())
 
-	orderBook := sys.Group("/orderbook")
-	orderBookRepo := _Repo.NewGormOrderBookRepository(db)
-	orderBookSvc := service.NewOrderBookService(orderBookRepo, timeout)
-	newOrderBookHTTPHandler(orderBook, orderBookSvc)
-
-	ticker := sys.Group("/ticker")
-	tx := sys.Group("/tx")
+	symbol := sys.Group("/symbol")
+	obRepo := _Repo.NewGormOrderBookRepository(db)
 	txRepo := _Repo.NewGormEosdaqTxRepository(db)
-	txSvc := service.NewEosdaqTxService(txRepo, timeout)
-	newEosdaqTxHTTPHandler(ticker, tx, txSvc)
+	sbSvc := service.NewSymbolService(obRepo, txRepo, timeout)
+	userSvc := service.NewUserService(obRepo, txRepo, timeout)
+	newSymbolHTTPHandler(symbol, sbSvc, userSvc, tiffanyBlue.GetString("jwt_access_key"))
 
 	user := sys.Group("/user")
-	userRepo := _Repo.NewGormUserRepository(db)
-	userSvc := service.NewUserService(txRepo, orderBookRepo, timeout)
-	newUserHTTPHandler(user, userSvc, burgundy.GetString("jwt_access_key"))
+	newUserHTTPHandler(user, userSvc, tiffanyBlue.GetString("jwt_access_key"))
 
 	return nil
 }
@@ -95,33 +89,33 @@ func newChartHTTPHandler(eg *echo.Group, cs service.ChartService) {
 	eg.GET("quotes", handler.Quotes)
 }
 
-// HTTPOrderBookHandler ...
-type HTTPOrderBookHandler struct {
-	OrderBookService service.OrderBookService
+// HTTPSymbolHandler ...
+type HTTPSymbolHandler struct {
+	sbService   service.SymbolService
+	userService service.UserService
 }
 
-func newOrderBookHTTPHandler(eg *echo.Group, obs service.OrderBookService) {
-	handler := &HTTPOrderBookHandler{
-		OrderBookService: obs,
+func newSymbolHTTPHandler(eg *echo.Group, sbSvc service.SymbolService, userSvc service.UserService, jwtkey string) {
+	handler := &HTTPSymbolHandler{
+		sbService:   sbSvc,
+		userService: userSvc,
 	}
 
-	eg.GET("/:symbol", handler.OrderBook)
-}
+	eg.GET("", handler.TickerList)
+	eg.GET("/:symbol", handler.Ticker)
+	eg.GET("/:symbol/tx", handler.SymbolTxList)
+	eg.GET("/:symbol/orderbook", handler.SymbolOrderBook)
 
-// HTTPEosdaqTxHandler ...
-type HTTPEosdaqTxHandler struct {
-	txService service.EosdaqTxService
-}
-
-func newEosdaqTxHTTPHandler(ticker *echo.Group, tx *echo.Group, txSvc service.EosdaqTxService) {
-	handler := &HTTPEosdaqTxHandler{
-		EosdaqTxService: txSvc,
+	user := eg.Group("/:symbol/user")
+	if jwtkey != "" {
+		user.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+			SigningKey:  []byte(jwtkey),
+			TokenLookup: "header:Authorization",
+		}))
 	}
 
-	ticker.GET("", handler.TickerList)
-	ticker.GET("/:symbol", handler.Ticker)
-
-	tx.GET("/:symbol", handler.SymbolTxList)
+	user.GET("/:accountName/tx", handler.SymbolUserTxList)
+	user.GET("/:accountName/orderbook", handler.SymbolUserOrderBook)
 }
 
 // HTTPUserHandler ...
@@ -131,7 +125,7 @@ type HTTPUserHandler struct {
 
 func newUserHTTPHandler(eg *echo.Group, user service.UserService, jwtkey string) {
 	handler := &HTTPUserHandler{
-		UserService: user,
+		userService: user,
 	}
 
 	if jwtkey != "" {
@@ -141,8 +135,8 @@ func newUserHTTPHandler(eg *echo.Group, user service.UserService, jwtkey string)
 		}))
 	}
 
-	eg.GET("/:accountName", handler.UserTxList)
-	eg.GET("/:accountName/symbol/:symbol", handler.UserSymbolTxList)
+	eg.GET("/:accountName/tx", handler.UserTxList)
 	eg.GET("/:accountName/orderbook", handler.UserOrderBook)
-	eg.GET("/:accountName/symbol/:symbol/orderbook", handler.UserSymbolOrderBook)
+	//eg.GET("/:accountName/symbol/:symbol", handler.UserSymbolTxList)
+	//eg.GET("/:accountName/symbol/:symbol/orderbook", handler.UserSymbolOrderBook)
 }
