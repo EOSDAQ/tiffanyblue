@@ -11,29 +11,17 @@ import (
 
 type orderBookUsecase struct {
 	orderBookRepo repository.OrderBookRepository
-	symbolMap     map[string]string
 	ctxTimeout    time.Duration
 }
 
 // NewOrderBookService ...
 func NewOrderBookService(obr repository.OrderBookRepository,
-	tokenRepo repository.TokenRepository,
 	timeout time.Duration) OrderBookService {
 
-	tokens, err := tokenRepo.GetTokens(context.Background())
-	if err != nil {
-		mlog.Errorw("NewOrderBookService", "err", err)
-		return nil
-	}
-	obu := &orderBookUsecase{
+	return &orderBookUsecase{
 		orderBookRepo: obr,
 		ctxTimeout:    timeout,
-		symbolMap:     make(map[string]string),
 	}
-	for _, t := range tokens {
-		obu.symbolMap[t.Symbol] = t.ContractAccount
-	}
-	return obu
 }
 
 // GetOrderBooks ...
@@ -41,17 +29,16 @@ func (obu orderBookUsecase) GetOrderBooks(ctx context.Context, symbol string) (o
 	innerCtx, cancel := context.WithTimeout(ctx, obu.ctxTimeout)
 	defer cancel()
 
-	var obinfos []*models.OrderInfo
-	if contract, ok := obu.symbolMap[symbol]; !ok {
-		mlog.Errorw("GetOrderBooks Invalid symbol", "symbol", symbol)
-		return nil, errors.Errorf("GetOrderBooks Symbol[%s]", symbol)
-	} else {
-		obinfos, err = obu.orderBookRepo.GetOrderInfos(innerCtx, contract)
-	}
+	obinfos, err := obu.orderBookRepo.GetOrderInfos(innerCtx, symbol)
 	if err != nil {
 		return nil, errors.Annotatef(err, "GetOrderBooks Symbol[%s]", symbol)
 	}
 
+	ob = ConvertOrderBook(obinfos)
+	return ob, nil
+}
+
+func ConvertOrderBook(obinfos []*models.OrderInfo) (ob *models.OrderBook) {
 	ob = &models.OrderBook{}
 	for _, info := range obinfos {
 		if info.Type == models.ASK {
@@ -60,5 +47,5 @@ func (obu orderBookUsecase) GetOrderBooks(ctx context.Context, symbol string) (o
 			ob.BidRow = append(ob.BidRow, info)
 		}
 	}
-	return ob, nil
+	return ob
 }

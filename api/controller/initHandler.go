@@ -12,6 +12,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	"go.uber.org/zap"
 )
 
@@ -52,14 +53,20 @@ func InitHandler(tiffanyBlue *conf.ViperConfig, e *echo.Echo, db *gorm.DB) (err 
 	sys.Use(mw.TransID())
 
 	orderBook := sys.Group("/orderbook")
-	ticker := sys.Group("/ticker")
 	orderBookRepo := _Repo.NewGormOrderBookRepository(db)
-	tokenRepo := _Repo.NewGormTokenRepository(db)
-	orderBookSvc := service.NewOrderBookService(orderBookRepo, tokenRepo, timeout)
-	tickerSvc := service.NewTickerService(tokenRepo, timeout)
-
+	orderBookSvc := service.NewOrderBookService(orderBookRepo, timeout)
 	newOrderBookHTTPHandler(orderBook, orderBookSvc)
-	newTickerHTTPHandler(ticker, tickerSvc)
+
+	ticker := sys.Group("/ticker")
+	tx := sys.Group("/tx")
+	txRepo := _Repo.NewGormEosdaqTxRepository(db)
+	txSvc := service.NewEosdaqTxService(txRepo, timeout)
+	newEosdaqTxHTTPHandler(ticker, tx, txSvc)
+
+	user := sys.Group("/user")
+	userRepo := _Repo.NewGormUserRepository(db)
+	userSvc := service.NewUserService(txRepo, orderBookRepo, timeout)
+	newUserHTTPHandler(user, userSvc, burgundy.GetString("jwt_access_key"))
 
 	return nil
 }
@@ -101,16 +108,41 @@ func newOrderBookHTTPHandler(eg *echo.Group, obs service.OrderBookService) {
 	eg.GET("/:symbol", handler.OrderBook)
 }
 
-// HTTPTickerHandler ...
-type HTTPTickerHandler struct {
-	TickerService service.TickerService
+// HTTPEosdaqTxHandler ...
+type HTTPEosdaqTxHandler struct {
+	txService service.EosdaqTxService
 }
 
-func newTickerHTTPHandler(eg *echo.Group, ts service.TickerService) {
-	handler := &HTTPTickerHandler{
-		TickerService: ts,
+func newEosdaqTxHTTPHandler(ticker *echo.Group, tx *echo.Group, txSvc service.EosdaqTxService) {
+	handler := &HTTPEosdaqTxHandler{
+		EosdaqTxService: txSvc,
 	}
 
-	eg.GET("", handler.TickerList)
-	eg.GET("/:symbol", handler.Ticker)
+	ticker.GET("", handler.TickerList)
+	ticker.GET("/:symbol", handler.Ticker)
+
+	tx.GET("/:symbol", handler.SymbolTxList)
+}
+
+// HTTPUserHandler ...
+type HTTPUserHandler struct {
+	userService service.UserService
+}
+
+func newUserHTTPHandler(eg *echo.Group, user service.UserService, jwtkey string) {
+	handler := &HTTPUserHandler{
+		UserService: user,
+	}
+
+	if jwtkey != "" {
+		eg.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+			SigningKey:  []byte(jwtkey),
+			TokenLookup: "header:Authorization",
+		}))
+	}
+
+	eg.GET("/:accountName", handler.UserTxList)
+	eg.GET("/:accountName/symbol/:symbol", handler.UserSymbolTxList)
+	eg.GET("/:accountName/orderbook", handler.UserOrderBook)
+	eg.GET("/:accountName/symbol/:symbol/orderbook", handler.UserSymbolOrderBook)
 }

@@ -36,8 +36,17 @@ type OrderBookService interface {
 	GetOrderBooks(ctx context.Context, symbol string) (obs *models.OrderBook, err error)
 }
 
-// TickerService ...
-type TickerService interface {
+// EosdaqTxService ...
+type EosdaqTxService interface {
 	GetTickers(ctx context.Context) (ts []*models.Token, err error)
 	GetTicker(ctx context.Context, symbol string) (ticker *models.Token, err error)
+	GetSymbolTxList(ctx context.Context, symbol string) (txs []*models.EosdaqTx, err error)
+}
+
+// UserService ...
+type UserService interface {
+	GetUserTxList(ctx context.Context, accountName string, offset int64) (txs []*models.EosdaqTx, err error)
+	GetUserSymbolTxList(ctx context.Context, accountName, symbol string) (txs []*models.EosdaqTx, err error)
+	GetUserOrderBook(ctx context.Context, accountName string) (obs *models.OrderBook, err error)
+	GetUserSymbolOrderBook(ctx context.Context, accountName, symbol string) (obs *models.OrderBook, err error)
 }
