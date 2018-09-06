@@ -38,8 +38,8 @@ func (uc *userUsecase) GetUserSymbolTxList(ctx context.Context, accountName, sym
 	return txs, nil
 }
 
-// GetUserSymbolOrderBook ...
-func (uc *userUsecase) GetUserSymbolOrderBook(ctx context.Context, accountName, symbol string) (ob *models.OrderBook, err error) {
+// GetUserSymbolOrderInfos ...
+func (uc *userUsecase) GetUserSymbolOrderInfos(ctx context.Context, accountName, symbol string) (obs []*models.OrderInfo, err error) {
 	innerCtx, cancel := context.WithTimeout(ctx, uc.ctxTimeout)
 	defer cancel()
 
@@ -47,24 +47,23 @@ func (uc *userUsecase) GetUserSymbolOrderBook(ctx context.Context, accountName, 
 	if err != nil {
 		return nil, errors.Annotatef(err, "GetUserSymbolOrderBook account[%s] symbol[%s]", accountName, symbol)
 	}
-	ob = ConvertOrderBook(obinfos)
-	return ob, nil
+	return obinfos, nil
 }
 
 // GetUserTxList ...
-func (uc *userUsecase) GetUserTxList(ctx context.Context, accountName string, offset int64) (txs []*models.EosdaqTx, err error) {
+func (uc *userUsecase) GetUserTxList(ctx context.Context, accountName string, page uint) (txs []*models.EosdaqTx, err error) {
 	innerCtx, cancel := context.WithTimeout(ctx, uc.ctxTimeout)
 	defer cancel()
 
-	txs, err = uc.txRepo.GetUserTxList(innerCtx, accountName, offset)
+	txs, err = uc.txRepo.GetUserTxList(innerCtx, accountName, page)
 	if err != nil {
 		return nil, errors.Annotatef(err, "GetUserTxList account[%s]", accountName)
 	}
 	return txs, nil
 }
 
-// GetUserOrderBook ...
-func (uc *userUsecase) GetUserOrderBook(ctx context.Context, accountName string) (ob *models.OrderBook, err error) {
+// GetUserOrderInfos ...
+func (uc *userUsecase) GetUserOrderInfos(ctx context.Context, accountName string) (obs []*models.OrderInfo, err error) {
 	innerCtx, cancel := context.WithTimeout(ctx, uc.ctxTimeout)
 	defer cancel()
 
@@ -73,6 +72,5 @@ func (uc *userUsecase) GetUserOrderBook(ctx context.Context, accountName string)
 		return nil, errors.Annotatef(err, "GetUserOrderBook account[%s]", accountName)
 	}
 
-	ob = ConvertOrderBook(obinfos)
-	return ob, nil
+	return obinfos, nil
 }

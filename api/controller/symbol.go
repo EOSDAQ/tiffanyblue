@@ -158,20 +158,20 @@ func (h *HTTPSymbolHandler) SymbolUserTxList(c echo.Context) (err error) {
 	})
 }
 
-// SymbolUserOrderBook ...
-func (h *HTTPSymbolHandler) SymbolUserOrderBook(c echo.Context) (err error) {
+// SymbolUserOrderInfos ...
+func (h *HTTPSymbolHandler) SymbolUserOrderInfos(c echo.Context) (err error) {
 
 	trID := c.Response().Header().Get(echo.HeaderXRequestID)
 	symbol := c.Param("symbol")
 	accountName := c.Param("accountName")
-	mlog.Debugw("SymbolUserOrderBook", "tr", trID, "symbol", symbol, "accountName", accountName)
+	mlog.Debugw("SymbolUserOrderInfos", "tr", trID, "symbol", symbol, "accountName", accountName)
 
 	ctx := c.Request().Context()
 	if ctx == nil {
 		ctx = context.Background()
 	}
 
-	obs, err := h.userService.GetUserSymbolOrderBook(ctx, accountName, symbol)
+	obinfos, err := h.userService.GetUserSymbolOrderInfos(ctx, accountName, symbol)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, TiffanyBlueStatus{
 			ResultCode: "1000",
@@ -184,6 +184,6 @@ func (h *HTTPSymbolHandler) SymbolUserOrderBook(c echo.Context) (err error) {
 		ResultCode: "0000",
 		ResultMsg:  "OK",
 		TRID:       trID,
-		ResultData: obs,
+		ResultData: obinfos,
 	})
 }

@@ -8,12 +8,13 @@ import (
 )
 
 type gormEosdaqTxRepository struct {
-	Conn *gorm.DB
+	Conn  *gorm.DB
+	limit uint
 }
 
 // NewGormEosdaqTxRepository ...
 func NewGormEosdaqTxRepository(Conn *gorm.DB) EosdaqTxRepository {
-	return &gormEosdaqTxRepository{Conn}
+	return &gormEosdaqTxRepository{Conn, 3}
 }
 
 func (g *gormEosdaqTxRepository) GetTickers(ctx context.Context) (ts []*models.Token, err error) {
@@ -34,9 +35,9 @@ func (g *gormEosdaqTxRepository) GetTicker(ctx context.Context, symbol string) (
 }
 
 func (g *gormEosdaqTxRepository) GetSymbolTxList(ctx context.Context, symbol string) (txs []*models.EosdaqTx, err error) {
-	scope := g.Conn.Where(models.EosdaqTx{OrderSymbol: symbol}).
+	scope := g.Conn.Where(&models.EosdaqTx{OrderSymbol: symbol}).
 		Order("id desc").
-		Limit(30).
+		Limit(g.limit).
 		Find(&txs)
 	if scope.RowsAffected == 0 {
 		return nil, nil
@@ -44,12 +45,13 @@ func (g *gormEosdaqTxRepository) GetSymbolTxList(ctx context.Context, symbol str
 	return txs, scope.Error
 }
 
-func (g *gormEosdaqTxRepository) GetUserTxList(ctx context.Context, accountName string, offset int64) (txs []*models.EosdaqTx, err error) {
+func (g *gormEosdaqTxRepository) GetUserTxList(ctx context.Context, accountName string, page uint) (txs []*models.EosdaqTx, err error) {
 	scope := g.Conn.Where(models.EosdaqTx{
 		EOSData: &models.EOSData{AccountName: accountName},
 	}).
 		Order("id desc").
-		Limit(30).
+		Offset((page - 1) * g.limit).
+		Limit(g.limit).
 		Find(&txs)
 	if scope.RowsAffected == 0 {
 		return nil, nil
@@ -60,7 +62,7 @@ func (g *gormEosdaqTxRepository) GetUserTxList(ctx context.Context, accountName 
 func (g *gormEosdaqTxRepository) GetUserSymbolTxList(ctx context.Context, accountName, symbol string) (txs []*models.EosdaqTx, err error) {
 	scope := g.Conn.Where(models.EosdaqTx{OrderSymbol: symbol, EOSData: &models.EOSData{AccountName: accountName}}).
 		Order("id desc").
-		Limit(30).
+		Limit(g.limit).
 		Find(&txs)
 	if scope.RowsAffected == 0 {
 		return nil, nil

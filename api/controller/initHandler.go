@@ -115,7 +115,7 @@ func newSymbolHTTPHandler(eg *echo.Group, sbSvc service.SymbolService, userSvc s
 	}
 
 	user.GET("/:accountName/tx", handler.SymbolUserTxList)
-	user.GET("/:accountName/orderbook", handler.SymbolUserOrderBook)
+	user.GET("/:accountName/orderbook", handler.SymbolUserOrderInfos)
 }
 
 // HTTPUserHandler ...
@@ -136,7 +136,5 @@ func newUserHTTPHandler(eg *echo.Group, user service.UserService, jwtkey string)
 	}
 
 	eg.GET("/:accountName/tx", handler.UserTxList)
-	eg.GET("/:accountName/orderbook", handler.UserOrderBook)
-	//eg.GET("/:accountName/symbol/:symbol", handler.UserSymbolTxList)
-	//eg.GET("/:accountName/symbol/:symbol/orderbook", handler.UserSymbolOrderBook)
+	eg.GET("/:accountName/orderbook", handler.UserOrderInfos)
 }

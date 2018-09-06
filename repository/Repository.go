@@ -85,6 +85,6 @@ type EosdaqTxRepository interface {
 	GetTicker(ctx context.Context, symbol string) (token *models.Token, err error)
 
 	GetSymbolTxList(ctx context.Context, symbol string) (txs []*models.EosdaqTx, err error)
-	GetUserTxList(ctx context.Context, accountName string, offst int64) (txs []*models.EosdaqTx, err error)
+	GetUserTxList(ctx context.Context, accountName string, page uint) (txs []*models.EosdaqTx, err error)
 	GetUserSymbolTxList(ctx context.Context, accountName, symbol string) (txs []*models.EosdaqTx, err error)
 }
