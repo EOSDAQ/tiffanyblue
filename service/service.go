@@ -31,13 +31,32 @@ type ChartService interface {
 	GetByID(ctx context.Context, id string) (*models.Chart, error)
 }
 
-// OrderBookService ...
-type OrderBookService interface {
-	GetOrderBooks(ctx context.Context, symbol string) (obs *models.OrderBook, err error)
-}
-
-// TickerService ...
-type TickerService interface {
+// SymbolService ...
+type SymbolService interface {
 	GetTickers(ctx context.Context) (ts []*models.Token, err error)
 	GetTicker(ctx context.Context, symbol string) (ticker *models.Token, err error)
+
+	GetSymbolTxList(ctx context.Context, symbol string) (txs []*models.EosdaqTx, err error)
+	GetSymbolOrderBook(ctx context.Context, symbol string) (ob *models.OrderBook, err error)
+}
+
+// UserService ...
+type UserService interface {
+	GetUserSymbolTxList(ctx context.Context, accountName, symbol string) (txs []*models.EosdaqTx, err error)
+	GetUserSymbolOrderInfos(ctx context.Context, accountName, symbol string) (obs []*models.OrderInfo, err error)
+
+	GetUserTxList(ctx context.Context, accountName string, page uint) (txs []*models.EosdaqTx, err error)
+	GetUserOrderInfos(ctx context.Context, accountName string) (obs []*models.OrderInfo, err error)
+}
+
+func ConvertOrderBook(obinfos []*models.OrderInfo) (ob *models.OrderBook) {
+	ob = &models.OrderBook{}
+	for _, info := range obinfos {
+		if info.Type == models.ASK {
+			ob.AskRow = append(ob.AskRow, info)
+		} else if info.Type == models.BID {
+			ob.BidRow = append(ob.BidRow, info)
+		}
+	}
+	return ob
 }

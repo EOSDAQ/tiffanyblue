@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	models "tiffanyBlue/models"
 
 	"github.com/jinzhu/gorm"
@@ -17,8 +16,36 @@ func NewGormOrderBookRepository(Conn *gorm.DB) OrderBookRepository {
 	return &gormOrderBookRepository{Conn}
 }
 
-func (g *gormOrderBookRepository) GetOrderInfos(ctx context.Context, contract string) (obs []*models.OrderInfo, err error) {
-	scope := g.Conn.Table(fmt.Sprintf("%s_order_books", contract)).Select("price, sum(volume) as volume, type").Group("price, type").Find(&obs)
+// GetOrderInfos ...
+func (g *gormOrderBookRepository) GetOrderInfos(ctx context.Context, symbol string) (obs []*models.OrderInfo, err error) {
+	scope := g.Conn.Table("order_books").
+		Select("price, sum(volume) as volume, type").
+		Where("order_symbol = ?", symbol).
+		Group("price, type").Find(&obs)
+	if scope.RowsAffected == 0 {
+		return nil, nil
+	}
+	return obs, scope.Error
+}
+
+// GetUserOrderInfos ...
+func (g *gormOrderBookRepository) GetUserOrderInfos(ctx context.Context, accountName string) (obs []*models.OrderInfo, err error) {
+	scope := g.Conn.Table("order_books").
+		Select("order_symbol, order_time, price, volume, type").
+		Where("account_name = ?", accountName).
+		Find(&obs)
+	if scope.RowsAffected == 0 {
+		return nil, nil
+	}
+	return obs, scope.Error
+}
+
+// GetUserSymbolOrderInfos ...
+func (g *gormOrderBookRepository) GetUserSymbolOrderInfos(ctx context.Context, accountName, symbol string) (obs []*models.OrderInfo, err error) {
+	scope := g.Conn.Table("order_books").
+		Select("order_symbol, order_time, price, volume, type").
+		Where("account_name = ? and order_symbol = ?", accountName, symbol).
+		Find(&obs)
 	if scope.RowsAffected == 0 {
 		return nil, nil
 	}

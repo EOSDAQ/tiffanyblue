@@ -74,11 +74,17 @@ type ChartRepository interface {
 
 // OrderBookRepository ...
 type OrderBookRepository interface {
-	GetOrderInfos(ctx context.Context, contract string) (obs []*models.OrderInfo, err error)
+	GetOrderInfos(ctx context.Context, symbol string) (obs []*models.OrderInfo, err error)
+	GetUserOrderInfos(ctx context.Context, accountName string) (obs []*models.OrderInfo, err error)
+	GetUserSymbolOrderInfos(ctx context.Context, accountName, symbol string) (obs []*models.OrderInfo, err error)
 }
 
-// TokenRepository ...
-type TokenRepository interface {
-	GetTokens(ctx context.Context) (ts []*models.Token, err error)
-	GetToken(ctx context.Context, symbol string) (token *models.Token, err error)
+// EosdaqTxRepository ...
+type EosdaqTxRepository interface {
+	GetTickers(ctx context.Context) (ts []*models.Token, err error)
+	GetTicker(ctx context.Context, symbol string) (token *models.Token, err error)
+
+	GetSymbolTxList(ctx context.Context, symbol string) (txs []*models.EosdaqTx, err error)
+	GetUserTxList(ctx context.Context, accountName string, page uint) (txs []*models.EosdaqTx, err error)
+	GetUserSymbolTxList(ctx context.Context, accountName, symbol string) (txs []*models.EosdaqTx, err error)
 }

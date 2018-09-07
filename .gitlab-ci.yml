@@ -1,0 +1,23 @@
+image: docker:latest
+services:
+    - docker:dind
+
+variables:
+    DOCKER_HOST: tcp://docker:2375
+    DOCKER_DRIVER: overlay2
+
+before_script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+
+stages:
+    - build
+
+build:
+    stage: build
+    script:
+        - docker pull $CI_REGISTRY_IMAGE:latest || true
+        - VERSION=`git describe --tags --always --dirty --match=v* 2> /dev/null || echo test` 
+        - BUILD_DATE=`date +%FT%T%z`
+        - docker build --cache-from $CI_REGISTRY_IMAGE:latest --tag $CI_REGISTRY_IMAGE:$CI_BUILD_REF --tag $CI_REGISTRY_IMAGE:latest --build-arg VERSION=${VERSION} --build-arg BUILD_PKG=${CI_PROJECT_NAME} --build-arg BUILD_PORT=1323 --build-arg BUILD_ENV=.env.stage.json .
+        - docker push $CI_REGISTRY_IMAGE:$CI_BUILD_REF
+        - docker push $CI_REGISTRY_IMAGE:latest

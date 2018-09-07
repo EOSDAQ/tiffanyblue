@@ -5,26 +5,39 @@ type OrderType int
 
 // OrderType types
 const (
-	ASK OrderType = iota
+	NONE OrderType = iota
+	ASK
 	BID
+	MATCH
+	CANCEL
+	REFUND
+	IGNORE
 )
 
 // String ...
 func (o OrderType) String() string {
 	switch o {
+	case NONE:
+		return ""
 	case ASK:
 		return "stask"
 	case BID:
 		return "stbid"
+	case MATCH:
+		return "match"
+	case CANCEL:
+		return "cancel"
+	case REFUND:
+		return "refund"
 	default:
-		return "tx"
+		return ""
 	}
 }
 
 // OrderInfo ...
 type OrderInfo struct {
-	Price  int       `json:"price"`
-	Volume int       `json:"volume"`
+	Price  uint64    `json:"price"`
+	Volume uint64    `json:"volume"`
 	Type   OrderType `json:"type"`
 }
 

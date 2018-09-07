@@ -12,6 +12,7 @@ import (
 
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	"go.uber.org/zap"
 )
 
@@ -51,15 +52,15 @@ func InitHandler(tiffanyBlue *conf.ViperConfig, e *echo.Echo, db *gorm.DB) (err 
 	sys := ver.Group("/eosdaq")
 	sys.Use(mw.TransID())
 
-	orderBook := sys.Group("/orderbook")
-	ticker := sys.Group("/ticker")
-	orderBookRepo := _Repo.NewGormOrderBookRepository(db)
-	tokenRepo := _Repo.NewGormTokenRepository(db)
-	orderBookSvc := service.NewOrderBookService(orderBookRepo, tokenRepo, timeout)
-	tickerSvc := service.NewTickerService(tokenRepo, timeout)
+	symbol := sys.Group("/symbol")
+	obRepo := _Repo.NewGormOrderBookRepository(db)
+	txRepo := _Repo.NewGormEosdaqTxRepository(db)
+	sbSvc := service.NewSymbolService(obRepo, txRepo, timeout)
+	userSvc := service.NewUserService(obRepo, txRepo, timeout)
+	newSymbolHTTPHandler(symbol, sbSvc, userSvc, tiffanyBlue.GetString("jwt_access_key"))
 
-	newOrderBookHTTPHandler(orderBook, orderBookSvc)
-	newTickerHTTPHandler(ticker, tickerSvc)
+	user := sys.Group("/user")
+	newUserHTTPHandler(user, userSvc, tiffanyBlue.GetString("jwt_access_key"))
 
 	return nil
 }
@@ -88,29 +89,52 @@ func newChartHTTPHandler(eg *echo.Group, cs service.ChartService) {
 	eg.GET("quotes", handler.Quotes)
 }
 
-// HTTPOrderBookHandler ...
-type HTTPOrderBookHandler struct {
-	OrderBookService service.OrderBookService
+// HTTPSymbolHandler ...
+type HTTPSymbolHandler struct {
+	sbService   service.SymbolService
+	userService service.UserService
 }
 
-func newOrderBookHTTPHandler(eg *echo.Group, obs service.OrderBookService) {
-	handler := &HTTPOrderBookHandler{
-		OrderBookService: obs,
-	}
-
-	eg.GET("/:symbol", handler.OrderBook)
-}
-
-// HTTPTickerHandler ...
-type HTTPTickerHandler struct {
-	TickerService service.TickerService
-}
-
-func newTickerHTTPHandler(eg *echo.Group, ts service.TickerService) {
-	handler := &HTTPTickerHandler{
-		TickerService: ts,
+func newSymbolHTTPHandler(eg *echo.Group, sbSvc service.SymbolService, userSvc service.UserService, jwtkey string) {
+	handler := &HTTPSymbolHandler{
+		sbService:   sbSvc,
+		userService: userSvc,
 	}
 
 	eg.GET("", handler.TickerList)
 	eg.GET("/:symbol", handler.Ticker)
+	eg.GET("/:symbol/tx", handler.SymbolTxList)
+	eg.GET("/:symbol/orderbook", handler.SymbolOrderBook)
+
+	user := eg.Group("/:symbol/user")
+	if jwtkey != "" {
+		user.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+			SigningKey:  []byte(jwtkey),
+			TokenLookup: "header:Authorization",
+		}))
+	}
+
+	user.GET("/:accountName/tx", handler.SymbolUserTxList)
+	user.GET("/:accountName/orderbook", handler.SymbolUserOrderInfos)
+}
+
+// HTTPUserHandler ...
+type HTTPUserHandler struct {
+	userService service.UserService
+}
+
+func newUserHTTPHandler(eg *echo.Group, user service.UserService, jwtkey string) {
+	handler := &HTTPUserHandler{
+		userService: user,
+	}
+
+	if jwtkey != "" {
+		eg.Use(middleware.JWTWithConfig(middleware.JWTConfig{
+			SigningKey:  []byte(jwtkey),
+			TokenLookup: "header:Authorization",
+		}))
+	}
+
+	eg.GET("/:accountName/tx", handler.UserTxList)
+	eg.GET("/:accountName/orderbook", handler.UserOrderInfos)
 }
