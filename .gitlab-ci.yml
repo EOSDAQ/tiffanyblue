@@ -10,7 +10,7 @@ variables:
 before_script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
 
-stage:
+stages:
     - build
 
 build:
