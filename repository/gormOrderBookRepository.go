@@ -31,9 +31,9 @@ func (g *gormOrderBookRepository) GetOrderInfos(ctx context.Context, symbol stri
 // GetUserOrderInfos ...
 func (g *gormOrderBookRepository) GetUserOrderInfos(ctx context.Context, accountName string) (obs []*models.OrderInfo, err error) {
 	scope := g.Conn.Table("order_books").
-		Select("price, sum(volume) as volume, type").
+		Select("order_symbol, order_time, price, volume, type").
 		Where("account_name = ?", accountName).
-		Group("price, type").Find(&obs)
+		Find(&obs)
 	if scope.RowsAffected == 0 {
 		return nil, nil
 	}
@@ -43,9 +43,9 @@ func (g *gormOrderBookRepository) GetUserOrderInfos(ctx context.Context, account
 // GetUserSymbolOrderInfos ...
 func (g *gormOrderBookRepository) GetUserSymbolOrderInfos(ctx context.Context, accountName, symbol string) (obs []*models.OrderInfo, err error) {
 	scope := g.Conn.Table("order_books").
-		Select("price, sum(volume) as volume, type").
+		Select("order_symbol, order_time, price, volume, type").
 		Where("account_name = ? and order_symbol = ?", accountName, symbol).
-		Group("price, type").Find(&obs)
+		Find(&obs)
 	if scope.RowsAffected == 0 {
 		return nil, nil
 	}

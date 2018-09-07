@@ -43,11 +43,11 @@ func (uc *userUsecase) GetUserSymbolOrderInfos(ctx context.Context, accountName,
 	innerCtx, cancel := context.WithTimeout(ctx, uc.ctxTimeout)
 	defer cancel()
 
-	obinfos, err := uc.obRepo.GetUserSymbolOrderInfos(innerCtx, accountName, symbol)
+	obs, err = uc.obRepo.GetUserSymbolOrderInfos(innerCtx, accountName, symbol)
 	if err != nil {
 		return nil, errors.Annotatef(err, "GetUserSymbolOrderBook account[%s] symbol[%s]", accountName, symbol)
 	}
-	return obinfos, nil
+	return obs, nil
 }
 
 // GetUserTxList ...
@@ -67,10 +67,10 @@ func (uc *userUsecase) GetUserOrderInfos(ctx context.Context, accountName string
 	innerCtx, cancel := context.WithTimeout(ctx, uc.ctxTimeout)
 	defer cancel()
 
-	obinfos, err := uc.obRepo.GetUserOrderInfos(innerCtx, accountName)
+	obs, err = uc.obRepo.GetUserOrderInfos(innerCtx, accountName)
 	if err != nil {
 		return nil, errors.Annotatef(err, "GetUserOrderBook account[%s]", accountName)
 	}
 
-	return obinfos, nil
+	return obs, nil
 }

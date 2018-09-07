@@ -33,6 +33,7 @@ type DefaultConf struct {
 	ConfDBPASS string
 	ConfDBNAME string
 
+	ConfAWSOn     bool
 	ConfAWSRegion string
 }
 
@@ -44,6 +45,7 @@ var defaultConf = DefaultConf{
 	ConfServerLOGMODE: "console",
 	ConfServerTIMEOUT: 30,
 	ConfAPILOGLEVEL:   "debug",
+	ConfAWSOn:         false,
 	ConfAWSRegion:     "ap-northeast-2",
 }
 
@@ -80,6 +82,7 @@ func init() {
 		"profile":     false,
 		"profilePort": 6060,
 		"aws_region":  defaultConf.ConfAWSRegion,
+		"aws_on":      defaultConf.ConfAWSOn,
 		"env":         "production",
 	})
 	if err != nil {
@@ -113,6 +116,7 @@ func readConfig(defaults map[string]interface{}) (*ViperConfig, error) {
 	case "DEVEL":
 		fmt.Println("Loading Development Environment...")
 		v.SetConfigName(defaultConf.EnvServerDEV)
+		v.Debug()
 	case "STAGE":
 		fmt.Println("Loading Stage Environment...")
 		v.SetConfigName(defaultConf.EnvServerSTAGE)
@@ -155,9 +159,8 @@ func (vp *ViperConfig) GetString(key string) string {
 	if v, ok := vp.cacheString[key]; ok {
 		return v
 	}
-	val := vp.Viper.GetString(key)
-	if val != "" {
-		vp.cacheString[key] = val
+	if !vp.Viper.GetBool("aws_on") {
+		vp.cacheString[key] = vp.Viper.GetString(key)
 	} else {
 		keyname := fmt.Sprintf("/eosdaq/%s/%s", vp.Viper.GetString("ENV"), key)
 		withDecryption := true
@@ -178,9 +181,8 @@ func (vp *ViperConfig) GetInt(key string) int {
 	if v, ok := vp.cacheInt[key]; ok {
 		return v
 	}
-	val := vp.Viper.GetInt(key)
-	if val != 0 {
-		vp.cacheInt[key] = val
+	if !vp.Viper.GetBool("aws_on") {
+		vp.cacheInt[key] = vp.Viper.GetInt(key)
 	} else {
 		keyname := fmt.Sprintf("/eosdaq/%s/%s", vp.Viper.GetString("ENV"), key)
 		withDecryption := true

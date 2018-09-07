@@ -14,7 +14,7 @@ type gormEosdaqTxRepository struct {
 
 // NewGormEosdaqTxRepository ...
 func NewGormEosdaqTxRepository(Conn *gorm.DB) EosdaqTxRepository {
-	return &gormEosdaqTxRepository{Conn, 3}
+	return &gormEosdaqTxRepository{Conn, 30}
 }
 
 func (g *gormEosdaqTxRepository) GetTickers(ctx context.Context) (ts []*models.Token, err error) {
