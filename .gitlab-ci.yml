@@ -1,6 +1,4 @@
-image: docker:latest
-services:
-    - docker:dind
+image: golang:latest
 
 variables:
     DOCKER_HOST: tcp://docker:2375
@@ -26,7 +24,6 @@ stages:
 
 setup:
     stage: setup
-    image: golang:latest
     script:
         - make vendor-update
     artifacts:
@@ -35,7 +32,6 @@ setup:
 
 go_test:
     stage: verify
-    image: golang:latest
     dependencies:
         - setup
     script:
@@ -45,7 +41,6 @@ go_test:
 
 megacheck:
     stage: verify
-    image: golang:latest
     dependencies:
         - setup
     script:
@@ -55,7 +50,6 @@ megacheck:
 
 go_fmt:
     stage: style
-    image: golang:latest
     dependencies:
         - setup
     script:
@@ -65,7 +59,6 @@ go_fmt:
 
 go_vet:
     stage: style
-    image: golang:latest
     dependencies:
         - setup
     script:
@@ -75,7 +68,6 @@ go_vet:
 
 golint:
     stage: style
-    image: golang:latest
     dependencies:
         - setup
     script:
@@ -83,16 +75,30 @@ golint:
     except:
         - master
 
-
 build:
     stage: build
     dependencies:
         - setup
     script:
-        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
         - make swagger build
+    artifacts:
+        paths:
+            - bin/
+    only:
+        - master
+
+docker.image:
+    stage: deploy
+    image: docker:latest
+    dependencies:
+        - build
+    services:
+        - docker:dind
+    before_script:
+        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+    script:
         - docker pull $CI_REGISTRY_IMAGE:latest || true
-        - make docker
+        - docker build --cache-from $CI_REGISTRY_IMAGE:latest --build-arg BUILD_PORT=1323 -t $CI_REGISTRY_IMAGE .
         - docker push $CI_REGISTRY_IMAGE:$CI_BUILD_REF
         - docker push $CI_REGISTRY_IMAGE:latest
     only:
