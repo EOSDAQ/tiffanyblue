@@ -29,9 +29,9 @@ func (g *gormOrderBookRepository) GetOrderInfos(ctx context.Context, symbol stri
 }
 
 // GetUserOrderInfos ...
-func (g *gormOrderBookRepository) GetUserOrderInfos(ctx context.Context, accountName string) (obs []*models.OrderInfo, err error) {
+func (g *gormOrderBookRepository) GetUserOrderInfos(ctx context.Context, accountName string) (obs []*models.UserOrderInfo, err error) {
 	scope := g.Conn.Table("order_books").
-		Select("order_symbol, order_time, price, volume, type").
+		Select("id, order_symbol, order_time, price, volume, type").
 		Where("account_name = ?", accountName).
 		Find(&obs)
 	if scope.RowsAffected == 0 {
@@ -41,9 +41,9 @@ func (g *gormOrderBookRepository) GetUserOrderInfos(ctx context.Context, account
 }
 
 // GetUserSymbolOrderInfos ...
-func (g *gormOrderBookRepository) GetUserSymbolOrderInfos(ctx context.Context, accountName, symbol string) (obs []*models.OrderInfo, err error) {
+func (g *gormOrderBookRepository) GetUserSymbolOrderInfos(ctx context.Context, accountName, symbol string) (obs []*models.UserOrderInfo, err error) {
 	scope := g.Conn.Table("order_books").
-		Select("order_symbol, order_time, price, volume, type").
+		Select("id, order_symbol, order_time, price, volume, type").
 		Where("account_name = ? and order_symbol = ?", accountName, symbol).
 		Find(&obs)
 	if scope.RowsAffected == 0 {

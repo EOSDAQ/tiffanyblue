@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 // OrderType ...
 type OrderType int
 
@@ -45,4 +47,12 @@ type OrderInfo struct {
 type OrderBook struct {
 	AskRow []*OrderInfo `json:"ask"`
 	BidRow []*OrderInfo `json:"bid"`
+}
+
+// UserOrderInfo ...
+type UserOrderInfo struct {
+	ID          int64     `json:"id"`
+	OrderSymbol string    `json:"orderSymbol"`
+	OrderTime   time.Time `json:"orderTime"`
+	*OrderInfo
 }
