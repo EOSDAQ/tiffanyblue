@@ -30,6 +30,9 @@ BUILDTAG=-tags 'release'
 .PHONY: all
 all: test megacheck fmt vet lint swagger build | $(BASE) ; $(info $(M) building all steps… ) @ ## Build all steps
 
+.PHONY: check
+check: test megacheck fmt vet lint | $(BASE) ; $(info $(M) check all steps… ) @ ## Check all steps 
+
 .PHONY: build
 build: $(BASE) ; $(info $(M) building executable… ) @ ## Build program binary
 	$Q cd $(BASE)/api && $(GOBUILD) build -i \
@@ -42,14 +45,9 @@ build: $(BASE) ; $(info $(M) building executable… ) @ ## Build program binary
 	$Q cd $(BASE) && cp -fp conf/.env.json bin/.
 	$Q cd $(BASE) && cp -fp api/swagger.json bin/.
 
-.PHONY: prebuild
-prebuild: $(BASE) ; $(info $(M) pre-building … ) @ ## pre-Build for main build
-	$Q $(SUDO) docker build --cache-from eosdaq/$(PACKAGE):prebuild -t eosdaq/$(PACKAGE):prebuild -f Dockerfile.prebuild .
-
 .PHONY: docker
 docker: ; $(info $(M) building docker image… ) @ ## Build for docker image
 	$Q $(SUDO) docker build --cache-from eosdaq/$(PACKAGE):latest --build-arg BUILD_PORT=1323 -t eosdaq/$(PACKAGE) .
-
 
 .PHONY: gobuild
 gobuild: ; $(info $(M) building gobuild image… ) @ ## Build for gobuild image
