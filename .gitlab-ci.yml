@@ -98,7 +98,7 @@ docker.image:
         - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
     script:
         - docker pull $CI_REGISTRY_IMAGE:latest || true
-        - docker build --cache-from $CI_REGISTRY_IMAGE:latest --build-arg BUILD_PORT=1323 -t $CI_REGISTRY_IMAGE .
+        - docker build --cache-from $CI_REGISTRY_IMAGE:latest --build-arg BUILD_PORT=1323 -t $CI_REGISTRY_IMAGE:$CI_BUILD_REF -t $CI_REGISTRY_IMAGE:latest .
         - docker push $CI_REGISTRY_IMAGE:$CI_BUILD_REF
         - docker push $CI_REGISTRY_IMAGE:latest
     only:
