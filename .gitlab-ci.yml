@@ -28,6 +28,7 @@ setup:
         - make vendor-update
     cache:
         key: "$CI_PROJECT_NAME-setup-cache"
+        untracekd: true
         paths:
             - vendor/
     artifacts:
