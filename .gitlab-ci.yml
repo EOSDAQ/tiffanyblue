@@ -24,10 +24,12 @@ stages:
 
 setup:
     stage: setup
-    dependencies:
-        - setup
     script:
         - make vendor-update
+    cache:
+        key: "$CI_PROJECT_NAME-setup-cache"
+        paths:
+            - vendor/
     artifacts:
         paths:
             - vendor/
