@@ -24,6 +24,8 @@ stages:
 
 setup:
     stage: setup
+    dependencies:
+        - setup
     script:
         - make vendor-update
     artifacts:
