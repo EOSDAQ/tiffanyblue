@@ -2,10 +2,8 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -14,12 +12,15 @@ import (
 	"syscall"
 	"time"
 
-	ct "tiffanyBlue/api/controller"
-	conf "tiffanyBlue/conf"
-	_Repo "tiffanyBlue/repository"
+	ct "tiffanyblue/api/controller"
+	mw "tiffanyblue/api/middleware"
+	conf "tiffanyblue/conf"
+	_Repo "tiffanyblue/repository"
+	"tiffanyblue/util"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
+	"go.uber.org/zap"
 )
 
 const (
@@ -42,7 +43,8 @@ var (
 	BuildDate string
 	// Version for Program Version
 	Version string
-	svrInfo = fmt.Sprintf("tiffanyBlue %s(%s)", Version, BuildDate)
+	svrInfo = fmt.Sprintf("tiffanyblue %s(%s)", Version, BuildDate)
+	mlog    *zap.SugaredLogger
 )
 
 func init() {
@@ -53,38 +55,27 @@ func init() {
 func main() {
 
 	TiffanyBlue := conf.TiffanyBlue
-	if TiffanyBlue.GetBool("v") {
+	if TiffanyBlue.GetBool("version") {
 		fmt.Printf("%s\n", svrInfo)
 		os.Exit(0)
 	}
 	TiffanyBlue.SetProfile()
+	mlog, _ = util.InitLog("main", TiffanyBlue.GetString("loglevel"))
 
-	//f := apiLogFile("./tiffanyBlue-api.log")
-	//defer f.Close()
-	e := echoInit(TiffanyBlue, nil)
+	e := echoInit(TiffanyBlue)
 
 	// Prepare Server
 	db := _Repo.InitDB(TiffanyBlue)
 	defer db.Close()
 	if err := ct.InitHandler(TiffanyBlue, e, db); err != nil {
-		fmt.Println("InitHandler error : ", err)
+		mlog.Errorw("InitHandler", "err", err)
 		os.Exit(1)
 	}
 
 	startServer(TiffanyBlue, e)
 }
 
-func apiLogFile(logfile string) *os.File {
-	// API Logging
-	f, err := os.OpenFile(logfile, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
-	if err != nil {
-		fmt.Println("apiLogFile error : ", err)
-		os.Exit(1)
-	}
-	return f
-}
-
-func echoInit(tiffanyBlue *conf.ViperConfig, apiLogF *os.File) (e *echo.Echo) {
+func echoInit(tiffanyblue *conf.ViperConfig) (e *echo.Echo) {
 
 	// Echo instance
 	e = echo.New()
@@ -101,15 +92,10 @@ func echoInit(tiffanyBlue *conf.ViperConfig, apiLogF *os.File) (e *echo.Echo) {
 	}))
 
 	// Ping Check
-	e.GET("/", func(c echo.Context) error { return c.String(http.StatusOK, "tiffanyBlue API Alive!\n") })
-	e.POST("/", func(c echo.Context) error { return c.String(http.StatusOK, "tiffanyBlue API Alive!\n") })
+	e.GET("/", func(c echo.Context) error { return c.String(http.StatusOK, "tiffanyblue API Alive!\n") })
+	e.POST("/", func(c echo.Context) error { return c.String(http.StatusOK, "tiffanyblue API Alive!\n") })
 
-	loggerConfig := middleware.DefaultLoggerConfig
-	//loggerConfig.Output = apiLogF
-
-	e.Use(middleware.LoggerWithConfig(loggerConfig))
-	e.Logger.SetOutput(bufio.NewWriterSize(apiLogF, 1024*16))
-	e.Logger.SetLevel(tiffanyBlue.APILogLevel())
+	e.Use(mw.ZapLogger(mlog))
 	e.HideBanner = true
 
 	sigInit(e)
@@ -144,14 +130,13 @@ func sigInit(e *echo.Echo) chan os.Signal {
 	return sc
 }
 
-func startServer(tiffanyBlue *conf.ViperConfig, e *echo.Echo) {
+func startServer(tiffanyblue *conf.ViperConfig, e *echo.Echo) {
 	// Start Server
-	apiServer := fmt.Sprintf("0.0.0.0:%d", tiffanyBlue.GetInt("port"))
-	log.Printf("%s => Starting server listen %s\n", svrInfo, apiServer)
+	apiServer := fmt.Sprintf("0.0.0.0:%d", tiffanyblue.GetInt("port"))
+	mlog.Infow("Starting server", "info", svrInfo, "listen", apiServer)
 	fmt.Printf(banner, svrInfo, apiServer)
 
 	if err := e.Start(apiServer); err != nil {
-		fmt.Println(err)
-		e.Logger.Error(err)
+		mlog.Errorw("End server", "err", err)
 	}
 }

@@ -1,7 +1,7 @@
 package models
 
 import (
-	"tiffanyBlue/util"
+	"tiffanyblue/util"
 
 	"go.uber.org/zap"
 )

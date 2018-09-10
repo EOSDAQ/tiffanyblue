@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"os"
 
-	"tiffanyBlue/conf"
-	models "tiffanyBlue/models"
-	"tiffanyBlue/util"
+	"tiffanyblue/conf"
+	models "tiffanyblue/models"
+	"tiffanyblue/util"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql" //mysql version
@@ -37,25 +37,25 @@ func init() {
 }
 
 // InitDB ...
-func InitDB(tiffanyBlue *conf.ViperConfig) *gorm.DB {
+func InitDB(tiffanyblue *conf.ViperConfig) *gorm.DB {
 
-	mlog, _ = util.InitLog("repository", tiffanyBlue.GetString("env"))
+	mlog, _ = util.InitLog("repository", tiffanyblue.GetString("loglevel"))
 
 	mlog.Debugw("InitDB ",
 		"host",
-		tiffanyBlue.GetString("db_host"),
+		tiffanyblue.GetString("db_host"),
 		"user",
-		tiffanyBlue.GetString("db_user"),
+		tiffanyblue.GetString("db_user"),
 		"name",
-		tiffanyBlue.GetString("db_name"),
+		tiffanyblue.GetString("db_name"),
 	)
 
 	dbURI := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
-		tiffanyBlue.GetString("db_user"),
-		tiffanyBlue.GetString("db_pass"),
-		tiffanyBlue.GetString("db_host"),
-		tiffanyBlue.GetInt("db_port"),
-		tiffanyBlue.GetString("db_name"),
+		tiffanyblue.GetString("db_user"),
+		tiffanyblue.GetString("db_pass"),
+		tiffanyblue.GetString("db_host"),
+		tiffanyblue.GetInt("db_port"),
+		tiffanyblue.GetString("db_name"),
 	)
 	dbConn, err := gorm.Open("mysql", dbURI) //mysql version
 	if err != nil {

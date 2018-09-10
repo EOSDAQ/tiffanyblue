@@ -62,14 +62,14 @@ var TiffanyBlue *ViperConfig
 
 func init() {
 	pflag.BoolP("version", "v", false, "Show version number and quit")
-	pflag.IntP("port", "p", defaultConf.ConfServerPORT, "tiffanyBlue Port")
-	pflag.IntP("timeout", "t", defaultConf.ConfServerTIMEOUT, "tiffanyBlue Context timeout(sec)")
+	pflag.IntP("port", "p", defaultConf.ConfServerPORT, "tiffanyblue Port")
+	pflag.IntP("timeout", "t", defaultConf.ConfServerTIMEOUT, "tiffanyblue Context timeout(sec)")
 
-	pflag.String("db_host", defaultConf.ConfDBHOST, "tiffanyBlue's DB host")
-	pflag.Int("db_port", defaultConf.ConfDBPORT, "tiffanyBlue's DB port")
-	pflag.String("db_user", defaultConf.ConfDBUSER, "tiffanyBlue's DB user")
-	pflag.String("db_pass", defaultConf.ConfDBPASS, "tiffanyBlue's DB password")
-	pflag.String("db_name", defaultConf.ConfDBNAME, "tiffanyBlue's DB name")
+	pflag.String("db_host", defaultConf.ConfDBHOST, "tiffanyblue's DB host")
+	pflag.Int("db_port", defaultConf.ConfDBPORT, "tiffanyblue's DB port")
+	pflag.String("db_user", defaultConf.ConfDBUSER, "tiffanyblue's DB user")
+	pflag.String("db_pass", defaultConf.ConfDBPASS, "tiffanyblue's DB password")
+	pflag.String("db_name", defaultConf.ConfDBNAME, "tiffanyblue's DB name")
 
 	pflag.Parse()
 
@@ -109,7 +109,7 @@ func readConfig(defaults map[string]interface{}) (*ViperConfig, error) {
 	v.AddConfigPath("./conf")
 	v.AddConfigPath("../conf")
 	v.AddConfigPath("../../conf")
-	v.AddConfigPath("$HOME/.tiffanyBlue")
+	v.AddConfigPath("$HOME/.tiffanyblue")
 	v.AutomaticEnv()
 
 	switch strings.ToUpper(v.GetString("ENV")) {
@@ -141,6 +141,7 @@ func readConfig(defaults map[string]interface{}) (*ViperConfig, error) {
 	}, nil
 }
 
+// InitAWSSSM ...
 func (vp *ViperConfig) InitAWSSSM() (err error) {
 	region := vp.Viper.GetString("aws_region")
 	sess, err := session.NewSessionWithOptions(session.Options{
@@ -155,6 +156,7 @@ func (vp *ViperConfig) InitAWSSSM() (err error) {
 	return nil
 }
 
+// GetString ...
 func (vp *ViperConfig) GetString(key string) string {
 	if v, ok := vp.cacheString[key]; ok {
 		return v
@@ -177,6 +179,7 @@ func (vp *ViperConfig) GetString(key string) string {
 	return vp.cacheString[key]
 }
 
+// GetInt ...
 func (vp *ViperConfig) GetInt(key string) int {
 	if v, ok := vp.cacheInt[key]; ok {
 		return v

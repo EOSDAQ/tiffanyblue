@@ -10,7 +10,8 @@ BASE    = $(GOPATH)/src/$(PACKAGE)
 PKGS     = $(or $(PKG),$(shell cd $(BASE) && env GOPATH=$(GOPATH) $(GO) list ./... 2>&1 | grep -v "^$(PACKAGE)/vendor/" | grep -v nocompile | grep -v logs))
 
 #GOENV   = CGO_LDFLAGS_ALLOW='-fopenmp'
-#GOENV   = CGO_ENABLED=0 GOOS=linux
+GOENV   = CGO_ENABLED=0 GOOS=linux
+GOBUILD = ${GOENV} go
 GO      = go
 GODOC   = godoc
 #GOFMT   = goreturns
@@ -27,8 +28,11 @@ endif
 BUILDTAG=-tags 'release'
 
 .PHONY: all
-all: test megacheck vendor fmt vet lint swagger | $(BASE) ; $(info $(M) building executable… ) @ ## Build program binary
-	$Q cd $(BASE)/api && $(GO) build -i \
+all: test megacheck fmt vet lint swagger build | $(BASE) ; $(info $(M) building all steps… ) @ ## Build all steps
+
+.PHONY: build
+build: $(BASE) ; $(info $(M) building executable… ) @ ## Build program binary
+	$Q cd $(BASE)/api && $(GOBUILD) build -i \
 		$(BUILDTAG) \
 		-ldflags '-X main.Version=$(VERSION) -X main.BuildDate=$(DATE)' \
 		-o $(BASE)/bin/$(PACKAGE)
@@ -38,9 +42,13 @@ all: test megacheck vendor fmt vet lint swagger | $(BASE) ; $(info $(M) building
 	$Q cd $(BASE) && cp -fp conf/.env.json bin/.
 	$Q cd $(BASE) && cp -fp api/swagger.json bin/.
 
+.PHONY: prebuild
+prebuild: $(BASE) ; $(info $(M) pre-building … ) @ ## pre-Build for main build
+	$Q $(SUDO) docker build --cache-from eosdaq/$(PACKAGE):prebuild -t eosdaq/$(PACKAGE):prebuild -f Dockerfile.prebuild .
+
 .PHONY: docker
 docker: ; $(info $(M) building docker image… ) @ ## Build for docker image
-	$Q $(SUDO) docker build --cache-from eosdaq/$(PACKAGE):latest --build-arg VERSION=$(VERSION) --build-arg BUILD_DATE=$(DATE) --build-arg BUILD_PKG=$(PACKAGE) -t eosdaq/$(PACKAGE) .
+	$Q $(SUDO) docker build --cache-from eosdaq/$(PACKAGE):latest --build-arg BUILD_PORT=1323 -t eosdaq/$(PACKAGE) .
 
 
 .PHONY: gobuild
@@ -109,13 +117,13 @@ test: | $(BASE) ; $(info $(M) running go test…) @ ## Run go test on all source
 	 done ; exit $$ret
 
 .PHONY: lint
-lint: $(BASE) $(GOLINT) ; $(info $(M) running golint…) @ ## Run golint
+lint: $(BASE) $(GOLINT) ; $(info $(M) running go lint…) @ ## Run golint
 	$Q cd $(BASE) && ret=0 && for pkg in $(PKGS); do \
 		test -z "$$($(GOLINT) $$pkg | tee /dev/stderr)" || ret=1 ; \
 	 done ; exit $$ret
 
 .PHONY: vet
-vet: ; $(info $(M) running go vet…) @ ## Run go vet on all source files
+vet: $(BASE) ; $(info $(M) running go vet…) @ ## Run go vet on all source files
 	$Q cd $(BASE) && ret=0 && for d in $$($(GO) list -f '{{.Dir}}' ./... 2>&1 | grep -v /vendor/ | grep -v nocompile); do \
 		cd $$d ; \
 		$(GO) vet $(BUILDTAG) || ret=$$? ; \
@@ -123,13 +131,13 @@ vet: ; $(info $(M) running go vet…) @ ## Run go vet on all source files
 	 done ; exit $$ret
 
 .PHONY: fmt
-fmt: $(GOFMT) ; $(info $(M) running gofmt…) @ ## Run gofmt on all source files
+fmt: $(GOFMT) ; $(info $(M) running go fmt…) @ ## Run gofmt on all source files
 	@ret=0 && for d in $$($(GO) list -f '{{.Dir}}' ./... 2>&1 | grep -v /vendor/ | grep -v nocompile); do \
 		$(GOFMT) -l -w $$d/*.go || ret=$$? ; \
 	 done ; exit $$ret
 
 .PHONY: megacheck
-megacheck: $(GOCHECK) ; $(info $(M) running gocheck…) @ ## Run gocheck on all source files
+megacheck: $(GOCHECK) ; $(info $(M) running go check…) @ ## Run gocheck on all source files
 	$Q cd $(BASE) && ret=0 && for pkg in $(PKGS); do \
 		test -z "$$($(GOCHECK) $$pkg | tee /dev/stderr)" || ret=1 ; \
 	 done ; exit $$ret

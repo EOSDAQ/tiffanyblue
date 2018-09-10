@@ -7,17 +7,93 @@ variables:
     DOCKER_DRIVER: overlay2
 
 before_script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
-
+    - export GO_PROJECT_PATH="$GOPATH/src/gitlab.com/$CI_PROJECT_NAMESPACE"
+    - echo $GO_PROJECT_PATH
+    - mkdir -p $GO_PROJECT_PATH
+    - export GO_PROJECT_PATH="$GO_PROJECT_PATH/$CI_PROJECT_NAME"
+    - ln -s $(pwd) $GO_PROJECT_PATH
+    - echo $GO_PROJECT_PATH
+    - cd $GO_PROJECT_PATH
+    - mkdir -p vendor
+    - ls -al vendor # Dont' delete this line!!
+        
 stages:
+    - setup
+    - verify
+    - style
     - build
+    - deploy
+
+setup:
+    stage: setup
+    image: golang:latest
+    script:
+        - make vendor-update
+    artifacts:
+        paths:
+            - vendor/
+
+go_test:
+    stage: verify
+    image: golang:latest
+    dependencies:
+        - setup
+    script:
+        - make test
+    except:
+        - master
+
+megacheck:
+    stage: verify
+    image: golang:latest
+    dependencies:
+        - setup
+    script:
+        - make megacheck
+    except:
+        - master
+
+go_fmt:
+    stage: style
+    image: golang:latest
+    dependencies:
+        - setup
+    script:
+        - make fmt
+    except:
+        - master
+
+go_vet:
+    stage: style
+    image: golang:latest
+    dependencies:
+        - setup
+    script:
+        - make vet
+    except:
+        - master
+
+golint:
+    stage: style
+    image: golang:latest
+    dependencies:
+        - setup
+    script:
+        - make lint
+    except:
+        - master
+
 
 build:
     stage: build
+    dependencies:
+        - setup
     script:
+        - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.com
+        - make swagger build
         - docker pull $CI_REGISTRY_IMAGE:latest || true
-        - VERSION=`git describe --tags --always --dirty --match=v* 2> /dev/null || echo test` 
-        - BUILD_DATE=`date +%FT%T%z`
-        - docker build --cache-from $CI_REGISTRY_IMAGE:latest --tag $CI_REGISTRY_IMAGE:$CI_BUILD_REF --tag $CI_REGISTRY_IMAGE:latest --build-arg VERSION=${VERSION} --build-arg BUILD_PKG=${CI_PROJECT_NAME} --build-arg BUILD_PORT=1323 --build-arg BUILD_ENV=.env.stage.json .
+        - make docker
         - docker push $CI_REGISTRY_IMAGE:$CI_BUILD_REF
         - docker push $CI_REGISTRY_IMAGE:latest
+    only:
+        - master

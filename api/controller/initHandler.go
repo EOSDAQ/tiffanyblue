@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"time"
 
-	mw "tiffanyBlue/api/middleware"
-	"tiffanyBlue/conf"
-	_Repo "tiffanyBlue/repository"
-	"tiffanyBlue/service"
-	"tiffanyBlue/util"
+	mw "tiffanyblue/api/middleware"
+	"tiffanyblue/conf"
+	_Repo "tiffanyblue/repository"
+	"tiffanyblue/service"
+	"tiffanyblue/util"
 
 	"github.com/jinzhu/gorm"
 	"github.com/labstack/echo"
@@ -33,10 +33,10 @@ func init() {
 }
 
 // InitHandler ...
-func InitHandler(tiffanyBlue *conf.ViperConfig, e *echo.Echo, db *gorm.DB) (err error) {
+func InitHandler(tiffanyblue *conf.ViperConfig, e *echo.Echo, db *gorm.DB) (err error) {
 
-	mlog, _ = util.InitLog("controller", tiffanyBlue.GetString("env"))
-	timeout := time.Duration(tiffanyBlue.GetInt("timeout")) * time.Second
+	mlog, _ = util.InitLog("controller", tiffanyblue.GetString("loglevel"))
+	timeout := time.Duration(tiffanyblue.GetInt("timeout")) * time.Second
 
 	// Default Group
 	chart := e.Group("/")
@@ -57,10 +57,10 @@ func InitHandler(tiffanyBlue *conf.ViperConfig, e *echo.Echo, db *gorm.DB) (err 
 	txRepo := _Repo.NewGormEosdaqTxRepository(db)
 	sbSvc := service.NewSymbolService(obRepo, txRepo, timeout)
 	userSvc := service.NewUserService(obRepo, txRepo, timeout)
-	newSymbolHTTPHandler(symbol, sbSvc, userSvc, tiffanyBlue.GetString("jwt_access_key"))
+	newSymbolHTTPHandler(symbol, sbSvc, userSvc, tiffanyblue.GetString("jwt_access_key"))
 
 	user := sys.Group("/user")
-	newUserHTTPHandler(user, userSvc, tiffanyBlue.GetString("jwt_access_key"))
+	newUserHTTPHandler(user, userSvc, tiffanyblue.GetString("jwt_access_key"))
 
 	return nil
 }
@@ -75,8 +75,8 @@ func newChartHTTPHandler(eg *echo.Group, cs service.ChartService) {
 		ChartService: cs,
 	}
 
-	eg.GET("", func(c echo.Context) error { return c.String(http.StatusOK, "tiffanyBlue API Alive!\n") })
-	eg.POST("", func(c echo.Context) error { return c.String(http.StatusOK, "tiffanyBlue API Alive!\n") })
+	eg.GET("", func(c echo.Context) error { return c.String(http.StatusOK, "tiffanyblue API Alive!\n") })
+	eg.POST("", func(c echo.Context) error { return c.String(http.StatusOK, "tiffanyblue API Alive!\n") })
 
 	eg.GET("config", handler.Config)
 	eg.GET("symbol_info", handler.SymbolInfo)
