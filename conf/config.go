@@ -178,6 +178,7 @@ func (vp *ViperConfig) GetString(key string) string {
 		})
 		if err != nil {
 			fmt.Printf("GetString cannot get parameter keyname[%s] err[%s]\n", keyname, err)
+			vp.cacheString[key] = vp.Viper.GetString(key)
 		} else {
 			vp.cacheString[key] = *param.Parameter.Value
 		}
@@ -201,10 +202,12 @@ func (vp *ViperConfig) GetInt(key string) int {
 		})
 		if err != nil {
 			fmt.Printf("GetInt cannot get parameter keyname[%s] err[%s]\n", keyname, err)
+			vp.cacheInt[key] = vp.Viper.GetInt(key)
 		} else {
 			v, err := strconv.Atoi(*param.Parameter.Value)
 			if err != nil {
 				fmt.Printf("GetInt parse error keyname[%s] param[%s] err[%s]\n", keyname, param, err)
+				vp.cacheInt[key] = vp.Viper.GetInt(key)
 			} else {
 				vp.cacheInt[key] = v
 			}
