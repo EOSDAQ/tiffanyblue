@@ -75,8 +75,8 @@ type ChartRepository interface {
 // OrderBookRepository ...
 type OrderBookRepository interface {
 	GetOrderInfos(ctx context.Context, symbol string) (obs []*models.OrderInfo, err error)
-	GetUserOrderInfos(ctx context.Context, accountName string) (obs []*models.OrderInfo, err error)
-	GetUserSymbolOrderInfos(ctx context.Context, accountName, symbol string) (obs []*models.OrderInfo, err error)
+	GetUserOrderInfos(ctx context.Context, accountName string) (obs []*models.UserOrderInfo, err error)
+	GetUserSymbolOrderInfos(ctx context.Context, accountName, symbol string) (obs []*models.UserOrderInfo, err error)
 }
 
 // EosdaqTxRepository ...

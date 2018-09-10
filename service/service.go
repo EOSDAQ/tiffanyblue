@@ -43,8 +43,8 @@ type SymbolService interface {
 // UserService ...
 type UserService interface {
 	GetUserSymbolTxList(ctx context.Context, accountName, symbol string) (txs []*models.EosdaqTx, err error)
-	GetUserSymbolOrderInfos(ctx context.Context, accountName, symbol string) (obs []*models.OrderInfo, err error)
+	GetUserSymbolOrderInfos(ctx context.Context, accountName, symbol string) (obs []*models.UserOrderInfo, err error)
 
 	GetUserTxList(ctx context.Context, accountName string, page uint) (txs []*models.EosdaqTx, err error)
-	GetUserOrderInfos(ctx context.Context, accountName string) (obs []*models.OrderInfo, err error)
+	GetUserOrderInfos(ctx context.Context, accountName string) (obs []*models.UserOrderInfo, err error)
 }

@@ -39,7 +39,7 @@ func (uc *userUsecase) GetUserSymbolTxList(ctx context.Context, accountName, sym
 }
 
 // GetUserSymbolOrderInfos ...
-func (uc *userUsecase) GetUserSymbolOrderInfos(ctx context.Context, accountName, symbol string) (obs []*models.OrderInfo, err error) {
+func (uc *userUsecase) GetUserSymbolOrderInfos(ctx context.Context, accountName, symbol string) (obs []*models.UserOrderInfo, err error) {
 	innerCtx, cancel := context.WithTimeout(ctx, uc.ctxTimeout)
 	defer cancel()
 
@@ -63,7 +63,7 @@ func (uc *userUsecase) GetUserTxList(ctx context.Context, accountName string, pa
 }
 
 // GetUserOrderInfos ...
-func (uc *userUsecase) GetUserOrderInfos(ctx context.Context, accountName string) (obs []*models.OrderInfo, err error) {
+func (uc *userUsecase) GetUserOrderInfos(ctx context.Context, accountName string) (obs []*models.UserOrderInfo, err error) {
 	innerCtx, cancel := context.WithTimeout(ctx, uc.ctxTimeout)
 	defer cancel()
 
