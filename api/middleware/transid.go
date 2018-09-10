@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"tiffanyBlue/util"
+	"tiffanyblue/util"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"

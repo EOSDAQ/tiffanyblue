@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+// EosdaqTx ...
 type EosdaqTx struct {
 	TXID          uint      `json:"-" gorm:"primary_key"`
 	ID            int64     `json:"id"`
@@ -12,6 +13,7 @@ type EosdaqTx struct {
 	*EOSData
 }
 
+// EOSData ...
 type EOSData struct {
 	// for Backend DB
 	AccountName string    `json:"accountName"`

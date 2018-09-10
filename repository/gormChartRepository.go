@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	models "tiffanyBlue/models"
+	models "tiffanyblue/models"
 
 	"github.com/jinzhu/gorm"
 )

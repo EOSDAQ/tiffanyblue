@@ -14,8 +14,8 @@ package service
 
 import (
 	"context"
-	"tiffanyBlue/models"
-	"tiffanyBlue/util"
+	"tiffanyblue/models"
+	"tiffanyblue/util"
 
 	"go.uber.org/zap"
 )
@@ -47,16 +47,4 @@ type UserService interface {
 
 	GetUserTxList(ctx context.Context, accountName string, page uint) (txs []*models.EosdaqTx, err error)
 	GetUserOrderInfos(ctx context.Context, accountName string) (obs []*models.OrderInfo, err error)
-}
-
-func ConvertOrderBook(obinfos []*models.OrderInfo) (ob *models.OrderBook) {
-	ob = &models.OrderBook{}
-	for _, info := range obinfos {
-		if info.Type == models.ASK {
-			ob.AskRow = append(ob.AskRow, info)
-		} else if info.Type == models.BID {
-			ob.BidRow = append(ob.BidRow, info)
-		}
-	}
-	return ob
 }

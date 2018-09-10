@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"tiffanyBlue/models"
-	"tiffanyBlue/repository"
+	"tiffanyblue/models"
+	"tiffanyblue/repository"
 	"time"
 
 	"github.com/juju/errors"

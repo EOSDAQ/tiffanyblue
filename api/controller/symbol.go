@@ -3,7 +3,7 @@ package controller
 import (
 	"context"
 	"net/http"
-	"tiffanyBlue/models"
+	"tiffanyblue/models"
 
 	"github.com/labstack/echo"
 )

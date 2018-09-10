@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo"
 )
 
+// UserTxList ...
 func (h *HTTPUserHandler) UserTxList(c echo.Context) (err error) {
 
 	type request struct {
@@ -53,6 +54,7 @@ func (h *HTTPUserHandler) UserTxList(c echo.Context) (err error) {
 	})
 }
 
+// UserOrderInfos ...
 func (h *HTTPUserHandler) UserOrderInfos(c echo.Context) (err error) {
 
 	trID := c.Response().Header().Get(echo.HeaderXRequestID)

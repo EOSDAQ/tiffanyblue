@@ -2,8 +2,8 @@ package service
 
 import (
 	"context"
-	"tiffanyBlue/models"
-	"tiffanyBlue/repository"
+	"tiffanyblue/models"
+	"tiffanyblue/repository"
 	"time"
 
 	"github.com/juju/errors"
@@ -71,6 +71,13 @@ func (su symbolUsecase) GetSymbolOrderBook(ctx context.Context, symbol string) (
 	if err != nil {
 		return nil, errors.Annotatef(err, "GetSymbolOrderBook symbol[%s]", symbol)
 	}
-	ob = ConvertOrderBook(obinfos)
+	ob = &models.OrderBook{}
+	for _, info := range obinfos {
+		if info.Type == models.ASK {
+			ob.AskRow = append(ob.AskRow, info)
+		} else if info.Type == models.BID {
+			ob.BidRow = append(ob.BidRow, info)
+		}
+	}
 	return ob, nil
 }
