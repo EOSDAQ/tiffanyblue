@@ -7,9 +7,8 @@ type OrderType int
 
 // OrderType types
 const (
-	NONE OrderType = iota
+	BID OrderType = iota
 	ASK
-	BID
 	MATCH
 	CANCEL
 	REFUND
@@ -19,18 +18,18 @@ const (
 // String ...
 func (o OrderType) String() string {
 	switch o {
-	case NONE:
-		return ""
-	case ASK:
-		return "stask"
 	case BID:
 		return "stbid"
+	case ASK:
+		return "stask"
 	case MATCH:
 		return "match"
 	case CANCEL:
 		return "cancel"
 	case REFUND:
 		return "refund"
+	case IGNORE:
+		return "ignore"
 	default:
 		return ""
 	}
